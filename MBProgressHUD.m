@@ -534,15 +534,21 @@ static const CGFloat kDetailsLabelFontSize = 12.f;
 	totalSize.width = MAX(totalSize.width, indicatorF.size.width);
 	totalSize.height += indicatorF.size.height;
 	
-	CGSize labelSize = MB_TEXTSIZE(label.text, label.font);
+	CGSize labelSize;
+
+	CGFloat remainingHeight = bounds.size.height - totalSize.height;
+    if (self.allowsMultilineLabel) {
+        labelSize = MB_MULTILINE_TEXTSIZE(label.text, label.font, CGSizeMake(maxWidth, remainingHeight), label.lineBreakMode);
+    } else {
+        labelSize = MB_TEXTSIZE(label.text, label.font);
+    }
 	labelSize.width = MIN(labelSize.width, maxWidth);
 	totalSize.width = MAX(totalSize.width, labelSize.width);
 	totalSize.height += labelSize.height;
 	if (labelSize.height > 0.f && indicatorF.size.height > 0.f) {
 		totalSize.height += kPadding;
 	}
-
-	CGFloat remainingHeight = bounds.size.height - totalSize.height - kPadding - 4 * margin; 
+    remainingHeight = bounds.size.height - totalSize.height - kPadding - 4 * margin;
 	CGSize maxSize = CGSizeMake(maxWidth, remainingHeight);
 	CGSize detailsLabelSize = MB_MULTILINE_TEXTSIZE(detailsLabel.text, detailsLabel.font, maxSize, detailsLabel.lineBreakMode);
 	totalSize.width = MAX(totalSize.width, detailsLabelSize.width);
@@ -669,7 +675,7 @@ static const CGFloat kDetailsLabelFontSize = 12.f;
 
 - (NSArray *)observableKeypaths {
 	return [NSArray arrayWithObjects:@"mode", @"customView", @"labelText", @"labelFont", @"labelColor",
-			@"detailsLabelText", @"detailsLabelFont", @"detailsLabelColor", @"progress", nil];
+			@"detailsLabelText", @"detailsLabelFont", @"detailsLabelColor", @"progress", @"allowsMultilineLabel", nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -700,7 +706,15 @@ static const CGFloat kDetailsLabelFontSize = 12.f;
 			[(id)indicator setProgress:progress];
 		}
 		return;
-	}
+	} else if ([keyPath isEqualToString:@"allowsMultilineLabel"]) {
+        if (self.allowsMultilineLabel) {
+            label.numberOfLines = 0;
+            label.lineBreakMode = NSLineBreakByWordWrapping;
+        } else {
+            label.numberOfLines = 1;
+            label.lineBreakMode = NSLineBreakByTruncatingTail;
+        }
+    }
 	[self setNeedsLayout];
 	[self setNeedsDisplay];
 }

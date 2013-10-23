@@ -420,9 +420,15 @@ typedef void (^MBProgressHUDCompletionBlock)();
 @property (assign) CGSize minSize;
 
 /**
- * Force the HUD dimensions to be equal if possible. 
+ * Force the HUD dimensions to be equal if possible.
  */
 @property (assign, getter = isSquare) BOOL square;
+
+/*
+ * YES = Multiline label text by word wrappings, NO = Clipped text at the end.
+ * Defaults to NO;
+ */
+@property (nonatomic, assign) BOOL allowsMultilineLabel;
 
 @end
 
